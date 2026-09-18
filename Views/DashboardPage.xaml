@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="StartFlow.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource LayerFillColorDefaultBrush}">
+        <ScrollViewer>
+            <StackPanel
+                Padding="40,32,40,40"
+                Spacing="20"
+                MaxWidth="940"
+                HorizontalAlignment="Center">
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="StartFlow" Style="{StaticResource TitleTextBlockStyle}" />
+                    <TextBlock
+                        Text="Быстрый запуск рабочего окружения"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Opacity="0.7" />
+                </StackPanel>
+
+                <InfoBar
+                    Severity="Warning"
+                    Title="Внимание"
+                    Message="{Binding LoadWarning}"
+                    IsOpen="{Binding HasLoadWarning, Mode=OneWay}"
+                    IsClosable="False" />
+
+                <Button
+                    Style="{StaticResource AccentButtonStyle}"
+                    Command="{Binding RunCommand}"
+                    HorizontalAlignment="Left"
+                    Padding="22,10">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <ProgressRing Width="16" Height="16" IsActive="{Binding IsRunning, Mode=OneWay}" />
+                        <FontIcon Glyph="&#xE768;" FontSize="14" />
+                        <TextBlock Text="Запустить всё" />
+                    </StackPanel>
+                </Button>
+
+                <Border Style="{StaticResource CardStyle}" Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <FontIcon
+                                Glyph="&#xE73E;"
+                                FontSize="18"
+                                Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                Visibility="{Binding HasErrors, Converter={StaticResource InverseBoolToVis}}" />
+                            <FontIcon
+                                Glyph="&#xE7BA;"
+                                FontSize="18"
+                                Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                Visibility="{Binding HasErrors, Converter={StaticResource BoolToVis}}" />
+                            <TextBlock
+                                Text="{Binding ResultTitle}"
+                                Style="{StaticResource SubtitleTextBlockStyle}"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding ResultSubtitle}" Style="{StaticResource SecondaryTextStyle}" />
+
+                        <Grid ColumnSpacing="28" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock Text="Создано папок" FontSize="12" Opacity="0.6" />
+                                <TextBlock Text="{Binding CreatedFolders}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="2">
+                                <TextBlock Text="Открыто папок" FontSize="12" Opacity="0.6" />
+                                <TextBlock Text="{Binding OpenedFolders}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="2">
+                                <TextBlock Text="Запущено" FontSize="12" Opacity="0.6" />
+                                <TextBlock Text="{Binding StartedPrograms}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Spacing="2">
+                                <TextBlock Text="Пропущено" FontSize="12" Opacity="0.6" />
+                                <TextBlock Text="{Binding SkippedPrograms}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Spacing="2">
+                                <TextBlock Text="Ошибок" FontSize="12" Opacity="0.6" />
+                                <TextBlock Text="{Binding ErrorCount}" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Grid>
+
+                        <ItemsControl
+                            ItemsSource="{Binding ErrorMessages}"
+                            Visibility="{Binding HasErrors, Converter={StaticResource BoolToVis}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2">
+                                        <FontIcon
+                                            Glyph="&#xE7BA;"
+                                            FontSize="14"
+                                            Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Папки" Style="{StaticResource SectionTitleStyle}" />
+
+                        <StackPanel Spacing="6" Visibility="{Binding FolderGenerationEnabled, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Создать" Style="{StaticResource FieldCaptionStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon
+                                    Glyph="&#xE8B7;"
+                                    FontSize="16"
+                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{Binding FolderGenerationLabel}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding FolderGenerationPath}" Style="{StaticResource SecondaryTextStyle}" />
+                        </StackPanel>
+
+                        <TextBlock
+                            Text="Генерация папки отключена"
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Visibility="{Binding FolderGenerationEnabled, Converter={StaticResource InverseBoolToVis}}" />
+
+                        <Rectangle Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+                        <StackPanel Spacing="6" Visibility="{Binding HasOpenFolders, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Открыть" Style="{StaticResource FieldCaptionStyle}" />
+                            <ItemsControl ItemsSource="{Binding OpenFolders}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2">
+                                            <FontIcon
+                                                Glyph="&#xE838;"
+                                                FontSize="14"
+                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <TextBlock
+                            Text="Нет папок для открытия"
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Visibility="{Binding HasOpenFolders, Converter={StaticResource InverseBoolToVis}}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Приложения" Style="{StaticResource SectionTitleStyle}" />
+
+                        <ItemsControl ItemsSource="{Binding Programs}" Visibility="{Binding HasPrograms, Converter={StaticResource BoolToVis}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource InnerCardStyle}" Margin="0,0,0,8">
+                                        <StackPanel Spacing="6">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon
+                                                    Glyph="&#xE8B7;"
+                                                    FontSize="14"
+                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{Binding DisplayName}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                            </StackPanel>
+                                            <TextBlock
+                                                Text="{Binding Path}"
+                                                Style="{StaticResource SecondaryTextStyle}"
+                                                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                TextTrimming="CharacterEllipsis" />
+
+                                            <ItemsControl
+                                                ItemsSource="{Binding Badges}"
+                                                Margin="0,4,0,0"
+                                                Visibility="{Binding HasBadges, Converter={StaticResource BoolToVis}}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="8" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Style="{StaticResource BadgePillStyle}">
+                                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                                <FontIcon
+                                                                    Glyph="{Binding Glyph}"
+                                                                    FontSize="11"
+                                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                    Visibility="{Binding HasGlyph, Converter={StaticResource BoolToVis}}" />
+                                                                <TextBlock Text="{Binding Text}" FontSize="12" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock
+                            Text="Нет приложений для запуска"
+                            Style="{StaticResource SecondaryTextStyle}"
+                            Visibility="{Binding HasPrograms, Converter={StaticResource InverseBoolToVis}}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
