@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "StartFlow (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "StartFlow (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
