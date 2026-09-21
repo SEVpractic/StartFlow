@@ -13,7 +13,7 @@
                 Padding="40,32,40,40"
                 Spacing="20"
                 MaxWidth="940"
-                HorizontalAlignment="Center">
+                HorizontalAlignment="Stretch">
 
                 <StackPanel Spacing="4">
                     <TextBlock Text="StartFlow" Style="{StaticResource TitleTextBlockStyle}" />
@@ -117,14 +117,22 @@
 
                         <StackPanel Spacing="6" Visibility="{Binding FolderGenerationEnabled, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="Создать" Style="{StaticResource FieldCaptionStyle}" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon
-                                    Glyph="&#xE8B7;"
-                                    FontSize="16"
-                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{Binding FolderGenerationLabel}" FontWeight="SemiBold" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding FolderGenerationPath}" Style="{StaticResource SecondaryTextStyle}" />
+                            <ItemsControl ItemsSource="{Binding FolderGenerations}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Spacing="2" Margin="0,2">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon
+                                                    Glyph="&#xE8B7;"
+                                                    FontSize="16"
+                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="{Binding Label}" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Path}" Style="{StaticResource SecondaryTextStyle}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
 
                         <TextBlock

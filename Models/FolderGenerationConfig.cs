@@ -8,5 +8,5 @@ public sealed class FolderGenerationConfig
 
     public string Path { get; set; } = string.Empty;
 
-    public string Template { get; set; } = "Homework {date}";
+    public string Template { get; set; } = "{date}";
 }

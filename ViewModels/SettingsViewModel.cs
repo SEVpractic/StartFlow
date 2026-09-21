@@ -258,8 +258,7 @@ public sealed class SettingsViewModel : ObservableBase
     private StartFlowConfig _config = StartFlowConfig.CreateDefault();
 
     private int _selectedThemeIndex;
-    private bool _isSaveInfoVisible;
-    private string? _saveInfoText;
+    private bool _isLoading;
     private string? _loadWarning;
 
     public SettingsViewModel(ConfigurationService configService)
@@ -268,7 +267,6 @@ public sealed class SettingsViewModel : ObservableBase
         AddFolderCommand = new AsyncRelayCommand(AddFolderAsync);
         AddFolderGenerationCommand = new AsyncRelayCommand(AddFolderGenerationAsync);
         AddProgramCommand = new AsyncRelayCommand(AddProgramAsync);
-        SaveCommand = new AsyncRelayCommand(SaveAsync);
     }
 
     public AsyncRelayCommand AddFolderCommand { get; }
@@ -276,8 +274,6 @@ public sealed class SettingsViewModel : ObservableBase
     public AsyncRelayCommand AddFolderGenerationCommand { get; }
 
     public AsyncRelayCommand AddProgramCommand { get; }
-
-    public AsyncRelayCommand SaveCommand { get; }
 
     public ObservableCollection<FolderToOpenEditor> Folders { get; } = new();
 
@@ -301,20 +297,12 @@ public sealed class SettingsViewModel : ObservableBase
                     _ => ThemeSystem
                 };
                 App.MainWindowInstance?.ApplyTheme(_config.Theme);
+                if (!_isLoading)
+                {
+                    AutoSave();
+                }
             }
         }
-    }
-
-    public bool IsSaveInfoVisible
-    {
-        get => _isSaveInfoVisible;
-        private set => SetField(ref _isSaveInfoVisible, value);
-    }
-
-    public string? SaveInfoText
-    {
-        get => _saveInfoText;
-        private set => SetField(ref _saveInfoText, value);
     }
 
     public string? LoadWarning
@@ -327,36 +315,44 @@ public sealed class SettingsViewModel : ObservableBase
 
     public void Load()
     {
-        _config = _configService.Load() ?? StartFlowConfig.CreateDefault();
-
-        LoadWarning = _configService.LoadWarning;
-        OnPropertyChanged(nameof(HasLoadWarning));
-
-        FolderGeneration.Clear();
-        foreach (var generation in _config.FolderGeneration)
+        _isLoading = true;
+        try
         {
-            FolderGeneration.Add(new FolderGenerationEditor(generation, RequestRemoveFolderGeneration));
+            _config = _configService.Load() ?? StartFlowConfig.CreateDefault();
+
+            LoadWarning = _configService.LoadWarning;
+            OnPropertyChanged(nameof(HasLoadWarning));
+
+            FolderGeneration.Clear();
+            foreach (var generation in _config.FolderGeneration)
+            {
+                FolderGeneration.Add(AttachAutoSave(new FolderGenerationEditor(generation, RequestRemoveFolderGeneration)));
+            }
+            OnPropertyChanged(nameof(FolderGeneration));
+
+            Folders.Clear();
+            foreach (var folder in _config.FoldersToOpen)
+            {
+                Folders.Add(AttachAutoSave(new FolderToOpenEditor(folder, RequestRemoveFolder)));
+            }
+
+            Programs.Clear();
+            foreach (var program in _config.Programs)
+            {
+                Programs.Add(AttachAutoSave(new ProgramEditor(program, RequestRemoveProgram)));
+            }
+
+            SelectedThemeIndex = _config.Theme switch
+            {
+                ThemeLight => 1,
+                ThemeDark => 2,
+                _ => 0
+            };
         }
-        OnPropertyChanged(nameof(FolderGeneration));
-
-        Folders.Clear();
-        foreach (var folder in _config.FoldersToOpen)
+        finally
         {
-            Folders.Add(new FolderToOpenEditor(folder, RequestRemoveFolder));
+            _isLoading = false;
         }
-
-        Programs.Clear();
-        foreach (var program in _config.Programs)
-        {
-            Programs.Add(new ProgramEditor(program, RequestRemoveProgram));
-        }
-
-        SelectedThemeIndex = _config.Theme switch
-        {
-            ThemeLight => 1,
-            ThemeDark => 2,
-            _ => 0
-        };
     }
 
     private async Task AddFolderAsync()
@@ -369,7 +365,8 @@ public sealed class SettingsViewModel : ObservableBase
 
         var model = new FolderToOpen { Path = path, Enabled = true };
         _config.FoldersToOpen.Add(model);
-        Folders.Add(new FolderToOpenEditor(model, RequestRemoveFolder));
+        Folders.Add(AttachAutoSave(new FolderToOpenEditor(model, RequestRemoveFolder)));
+        AutoSave();
     }
 
     private async Task AddFolderGenerationAsync()
@@ -385,10 +382,11 @@ public sealed class SettingsViewModel : ObservableBase
             Enabled = true,
             OpenAfterCreate = true,
             Path = path,
-            Template = "Homework {date}"
+            Template = "{date}"
         };
         _config.FolderGeneration.Add(model);
-        FolderGeneration.Add(new FolderGenerationEditor(model, RequestRemoveFolderGeneration));
+        FolderGeneration.Add(AttachAutoSave(new FolderGenerationEditor(model, RequestRemoveFolderGeneration)));
+        AutoSave();
     }
 
     private async Task AddProgramAsync()
@@ -408,7 +406,8 @@ public sealed class SettingsViewModel : ObservableBase
             Enabled = true
         };
         _config.Programs.Add(model);
-        Programs.Add(new ProgramEditor(model, RequestRemoveProgram));
+        Programs.Add(AttachAutoSave(new ProgramEditor(model, RequestRemoveProgram)));
+        AutoSave();
     }
 
     private async void RequestRemoveFolder(FolderToOpenEditor editor)
@@ -433,6 +432,7 @@ public sealed class SettingsViewModel : ObservableBase
 
         _config.FoldersToOpen.Remove(editor.Model);
         Folders.Remove(editor);
+        AutoSave();
     }
 
     private async void RequestRemoveFolderGeneration(FolderGenerationEditor editor)
@@ -457,6 +457,7 @@ public sealed class SettingsViewModel : ObservableBase
 
         _config.FolderGeneration.Remove(editor.Model);
         FolderGeneration.Remove(editor);
+        AutoSave();
     }
 
     private async void RequestRemoveProgram(ProgramEditor editor)
@@ -481,21 +482,25 @@ public sealed class SettingsViewModel : ObservableBase
 
         _config.Programs.Remove(editor.Model);
         Programs.Remove(editor);
+        AutoSave();
     }
 
-    private async Task SaveAsync()
+    private T AttachAutoSave<T>(T editor) where T : ObservableBase
     {
-        if (_configService.Save(_config, out var error))
-        {
-            SaveInfoText = "Настройки сохранены.";
-        }
-        else
-        {
-            SaveInfoText = $"Не удалось сохранить настройки: {error}";
-        }
+        editor.PropertyChanged += OnEditorPropertyChanged;
+        return editor;
+    }
 
-        IsSaveInfoVisible = true;
-        await Task.Delay(3000);
-        IsSaveInfoVisible = false;
+    private void AutoSave()
+    {
+        _configService.Save(_config, out _);
+    }
+
+    private void OnEditorPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (!_isLoading)
+        {
+            AutoSave();
+        }
     }
 }
