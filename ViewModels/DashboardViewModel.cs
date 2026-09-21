@@ -40,6 +40,19 @@ public sealed class ProgramCardItem
     public bool HasBadges => Badges.Count > 0;
 }
 
+public sealed class FolderGenerationCardItem
+{
+    public FolderGenerationCardItem(string label, string path)
+    {
+        Label = label;
+        Path = path;
+    }
+
+    public string Label { get; }
+
+    public string Path { get; }
+}
+
 public sealed class DashboardViewModel : ObservableBase
 {
     private readonly ConfigurationService _configService;
@@ -56,8 +69,6 @@ public sealed class DashboardViewModel : ObservableBase
     private int _skippedPrograms;
     private int _errorCount;
     private bool _folderGenerationEnabled;
-    private string? _folderGenerationLabel;
-    private string? _folderGenerationPath;
     private bool _hasOpenFolders;
     private bool _hasPrograms;
     private string? _loadWarning;
@@ -109,11 +120,9 @@ public sealed class DashboardViewModel : ObservableBase
 
     public int ErrorCount { get => _errorCount; private set => SetField(ref _errorCount, value); }
 
-    public bool FolderGenerationEnabled { get => _folderGenerationEnabled; private set => SetField(ref _folderGenerationEnabled, value); }
+public bool FolderGenerationEnabled { get => _folderGenerationEnabled; private set => SetField(ref _folderGenerationEnabled, value); }
 
-    public string? FolderGenerationLabel { get => _folderGenerationLabel; private set => SetField(ref _folderGenerationLabel, value); }
-
-    public string? FolderGenerationPath { get => _folderGenerationPath; private set => SetField(ref _folderGenerationPath, value); }
+public ObservableCollection<FolderGenerationCardItem> FolderGenerations { get; } = new();
 
     public bool HasOpenFolders { get => _hasOpenFolders; private set => SetField(ref _hasOpenFolders, value); }
 
@@ -137,22 +146,28 @@ public sealed class DashboardViewModel : ObservableBase
 
     private void RefreshFolderGeneration(StartFlowConfig config)
     {
-        var generation = config.FolderGeneration.FirstOrDefault(g => g is not null && g.Enabled);
-        FolderGenerationEnabled = generation is not null
-            && !string.IsNullOrWhiteSpace(generation.Path)
-            && !string.IsNullOrWhiteSpace(generation.Template);
+        var items = new List<FolderGenerationCardItem>();
 
-        if (FolderGenerationEnabled)
+        foreach (var generation in config.FolderGeneration.Where(g => g is not null && g.Enabled))
         {
-            var full = FolderService.ResolveTemplatePath(generation!);
-            FolderGenerationLabel = Path.GetFileName(full);
-            FolderGenerationPath = Path.GetDirectoryName(full) ?? generation!.Path;
+            if (string.IsNullOrWhiteSpace(generation.Path) || string.IsNullOrWhiteSpace(generation.Template))
+            {
+                continue;
+            }
+
+            var full = FolderService.ResolveTemplatePath(generation);
+            items.Add(new FolderGenerationCardItem(
+                Path.GetFileName(full),
+                Path.GetDirectoryName(full) ?? generation.Path));
         }
-        else
+
+        FolderGenerations.Clear();
+        foreach (var item in items)
         {
-            FolderGenerationLabel = null;
-            FolderGenerationPath = null;
+            FolderGenerations.Add(item);
         }
+
+        FolderGenerationEnabled = FolderGenerations.Count > 0;
     }
 
     private void RefreshOpenFolders(StartFlowConfig config)
