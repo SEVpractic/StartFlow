@@ -1,40 +1,22 @@
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using WinRT.Interop;
+using System.IO;
 
 namespace StartFlow.Services;
 
 public static class PickerService
 {
-    public static async Task<string?> PickFolderAsync()
+    public static Task<string?> PickFolderAsync()
+        => Task.FromResult(CommonDialogs.PickFolder(App.MainWindowHandle, RootCatalog));
+
+    public static Task<string?> PickExecutableAsync()
     {
-        var picker = new FolderPicker
+        var fileTypes = new[]
         {
-            SuggestedStartLocation = PickerLocationId.ComputerFolder
+            new COMDLG_FILTERSPEC { pszName = "Программы", pszSpec = "*.exe;*.bat;*.cmd;*.lnk" },
+            new COMDLG_FILTERSPEC { pszName = "Все файлы", pszSpec = "*.*" }
         };
-        picker.FileTypeFilter.Add("*");
 
-        InitializeWithWindow.Initialize(picker, App.MainWindowHandle);
-
-        StorageFolder? folder = await picker.PickSingleFolderAsync();
-        return folder?.Path;
+        return Task.FromResult(CommonDialogs.PickFile(App.MainWindowHandle, RootCatalog, fileTypes));
     }
 
-    public static async Task<string?> PickExecutableAsync()
-    {
-        var picker = new FileOpenPicker
-        {
-            SuggestedStartLocation = PickerLocationId.ComputerFolder,
-            CommitButtonText = "Выбрать"
-        };
-        picker.FileTypeFilter.Add(".exe");
-        picker.FileTypeFilter.Add(".bat");
-        picker.FileTypeFilter.Add(".cmd");
-        picker.FileTypeFilter.Add(".lnk");
-
-        InitializeWithWindow.Initialize(picker, App.MainWindowHandle);
-
-        StorageFile? file = await picker.PickSingleFileAsync();
-        return file?.Path;
-    }
+    private static string RootCatalog => Path.GetPathRoot(Environment.SystemDirectory) ?? @"C:\";
 }

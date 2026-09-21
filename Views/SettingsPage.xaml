@@ -43,41 +43,58 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Style="{StaticResource InnerCardStyle}" Margin="0,0,0,8">
-                                        <StackPanel Spacing="10">
-                                            <Grid ColumnSpacing="8">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBox
-                                                    Grid.Column="0"
-                                                    IsSpellCheckEnabled="False"
-                                                    Text="{Binding Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                <Button
-                                                    Grid.Column="1"
-                                                    Content="Выбрать"
-                                                    Command="{Binding ChoosePathCommand}"
-                                                    VerticalAlignment="Bottom" />
-                                            </Grid>
+                                        <Grid ColumnSpacing="8" RowSpacing="10">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
 
                                             <TextBox
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                Header="Путь"
+                                                IsSpellCheckEnabled="False"
+                                                Text="{Binding Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <Button
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                Content="Выбрать"
+                                                Command="{Binding ChoosePathCommand}"
+                                                VerticalAlignment="Bottom" />
+
+                                            <TextBox
+                                                Grid.Row="1"
+                                                Grid.Column="0"
                                                 Header="Шаблон имени"
                                                 PlaceholderText="Homework {date}"
                                                 IsSpellCheckEnabled="False"
                                                 Text="{Binding Template, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                                             <ToggleSwitch
+                                                Grid.Row="2"
+                                                Grid.Column="0"
                                                 Header="Создавать папку при запуске"
                                                 IsOn="{Binding Enabled, Mode=TwoWay}" />
 
                                             <ToggleSwitch
+                                                Grid.Row="3"
+                                                Grid.Column="0"
                                                 Header="Открыть после создания"
                                                 IsOn="{Binding OpenAfterCreate, Mode=TwoWay}" />
 
                                             <Button
+                                                Grid.Row="3"
+                                                Grid.Column="1"
                                                 Content="Удалить"
-                                                Command="{Binding DeleteCommand}" />
-                                        </StackPanel>
+                                                Command="{Binding DeleteCommand}"
+                                                VerticalAlignment="Center" />
+                                        </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -103,12 +120,14 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBox
                                                     Grid.Column="0"
+                                                    Header="Путь"
                                                     IsSpellCheckEnabled="False"
                                                     Text="{Binding Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                 <Button
                                                     Grid.Column="1"
                                                     Content="Выбрать"
-                                                    Command="{Binding ChoosePathCommand}" />
+                                                    Command="{Binding ChoosePathCommand}"
+                                                    VerticalAlignment="Bottom" />
                                             </Grid>
                                             <Grid ColumnSpacing="8">
                                                 <Grid.ColumnDefinitions>
@@ -206,6 +225,22 @@
                         </ItemsControl>
 
                         <Button Content="+ Добавить приложение" Command="{Binding AddProgramCommand}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Тема" Style="{StaticResource SectionTitleStyle}" />
+
+                        <ComboBox
+                            Header="Внешний вид"
+                            HorizontalAlignment="Left"
+                            MinWidth="240"
+                            SelectedIndex="{Binding SelectedThemeIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="Системная" />
+                            <ComboBoxItem Content="Светлая" />
+                            <ComboBoxItem Content="Тёмная" />
+                        </ComboBox>
                     </StackPanel>
                 </Border>
             </StackPanel>
