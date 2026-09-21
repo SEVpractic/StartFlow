@@ -30,19 +30,6 @@
                     IsOpen="{Binding HasLoadWarning, Mode=OneWay}"
                     IsClosable="False" />
 
-                <Button
-                    Content="Сохранить"
-                    Style="{StaticResource AccentButtonStyle}"
-                    Command="{Binding SaveCommand}"
-                    HorizontalAlignment="Left"
-                    Padding="20,8" />
-
-                <InfoBar
-                    Severity="Success"
-                    Title="Готово"
-                    Message="{Binding SaveInfoText}"
-                    IsOpen="{Binding IsSaveInfoVisible, Mode=OneWay}"
-                    IsClosable="False" />
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Генерация папки" Style="{StaticResource SectionTitleStyle}" />
