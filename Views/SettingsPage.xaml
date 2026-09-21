@@ -185,6 +185,23 @@
                                                     VerticalAlignment="Bottom" />
                                             </Grid>
 
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox
+                                                    Grid.Column="0"
+                                                    Header="Рабочая директория"
+                                                    IsSpellCheckEnabled="False"
+                                                    Text="{Binding WorkingDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Button
+                                                    Grid.Column="1"
+                                                    Content="Выбрать"
+                                                    Command="{Binding ChooseWorkingDirectoryCommand}"
+                                                    VerticalAlignment="Bottom" />
+                                            </Grid>
+
                                             <TextBox
                                                 Header="Аргументы"
                                                 IsSpellCheckEnabled="False"

@@ -81,6 +81,7 @@ StartFlow.exe --help
       "name": "Visual Studio",
       "path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
       "args": "",
+      "workingDirectory": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE",
       "runAsAdmin": true,
       "skipIfRunning": true,
       "processName": "devenv",
@@ -115,6 +116,10 @@ StartFlow.exe --help
 ## `skipIfRunning`
 
 Если у приложения включён `skipIfRunning: true`, указывается `processName`, и такой процесс уже запущен — приложение пропускается (считается в «Пропущено»). Если `processName` пустой, проверка пропускается, приложение запускается. `.exe` в имени процесса не обязателен — он отбрасывается автоматически.
+
+## `workingDirectory`
+
+Рабочая директория, с которой запускается приложение (например, для OBS Studio нужен каталог рядом с `obs64.exe`). Если `workingDirectory` не указан или пустой, автоматически используется директория, содержащая исполняемый файл из `path`. Свойство необязательное — старые конфигурации без него продолжают работать.
 
 ## Примечания
 

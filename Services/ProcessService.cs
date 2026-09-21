@@ -40,6 +40,12 @@ public sealed class ProcessService
             UseShellExecute = true
         };
 
+        var workingDirectory = ResolveWorkingDirectory(program);
+        if (!string.IsNullOrWhiteSpace(workingDirectory))
+        {
+            startInfo.WorkingDirectory = workingDirectory;
+        }
+
         if (!string.IsNullOrWhiteSpace(program.Args))
         {
             startInfo.Arguments = program.Args;
@@ -52,5 +58,16 @@ public sealed class ProcessService
 
         Process.Start(startInfo);
         return ProgramStartResult.Started;
+    }
+
+    private static string? ResolveWorkingDirectory(ProgramConfig program)
+    {
+        if (!string.IsNullOrWhiteSpace(program.WorkingDirectory))
+        {
+            return program.WorkingDirectory;
+        }
+
+        var directory = Path.GetDirectoryName(program.Path);
+        return string.IsNullOrWhiteSpace(directory) ? null : directory;
     }
 }

@@ -8,6 +8,8 @@ public sealed class ProgramConfig
 
     public string Args { get; set; } = string.Empty;
 
+    public string WorkingDirectory { get; set; } = string.Empty;
+
     public bool RunAsAdmin { get; set; }
 
     public bool SkipIfRunning { get; set; }
