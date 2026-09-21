@@ -13,7 +13,7 @@
                 Padding="40,32,40,48"
                 Spacing="16"
                 MaxWidth="940"
-                HorizontalAlignment="Center">
+                HorizontalAlignment="Stretch">
 
                 <StackPanel Spacing="4">
                     <TextBlock Text="Настройки" Style="{StaticResource TitleTextBlockStyle}" />
@@ -72,7 +72,7 @@
                                                 Grid.Row="1"
                                                 Grid.Column="0"
                                                 Header="Шаблон имени"
-                                                PlaceholderText="Homework {date}"
+                                                PlaceholderText="{}{date}"
                                                 IsSpellCheckEnabled="False"
                                                 Text="{Binding Template, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 

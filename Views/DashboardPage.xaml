@@ -13,7 +13,7 @@
                 Padding="40,32,40,40"
                 Spacing="20"
                 MaxWidth="940"
-                HorizontalAlignment="Center">
+                HorizontalAlignment="Stretch">
 
                 <StackPanel Spacing="4">
                     <TextBlock Text="StartFlow" Style="{StaticResource TitleTextBlockStyle}" />

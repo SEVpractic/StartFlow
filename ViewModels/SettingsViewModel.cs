@@ -382,7 +382,7 @@ public sealed class SettingsViewModel : ObservableBase
             Enabled = true,
             OpenAfterCreate = true,
             Path = path,
-            Template = "Homework {date}"
+            Template = "{date}"
         };
         _config.FolderGeneration.Add(model);
         FolderGeneration.Add(AttachAutoSave(new FolderGenerationEditor(model, RequestRemoveFolderGeneration)));
