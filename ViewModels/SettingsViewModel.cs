@@ -136,10 +136,13 @@ public sealed class ProgramEditor : ObservableBase
         _requestRemove = requestRemove;
         _nameWasAuto = model.Name;
         ChooseExeCommand = new AsyncRelayCommand(ChooseExeAsync);
+        ChooseWorkingDirectoryCommand = new AsyncRelayCommand(ChooseWorkingDirectoryAsync);
         DeleteCommand = new RelayCommand(() => _requestRemove(this));
     }
 
     public AsyncRelayCommand ChooseExeCommand { get; }
+
+    public AsyncRelayCommand ChooseWorkingDirectoryCommand { get; }
 
     public RelayCommand DeleteCommand { get; }
 
@@ -171,6 +174,16 @@ public sealed class ProgramEditor : ObservableBase
         set
         {
             _model.Args = value ?? string.Empty;
+            OnPropertyChanged();
+        }
+    }
+
+    public string WorkingDirectory
+    {
+        get => _model.WorkingDirectory;
+        set
+        {
+            _model.WorkingDirectory = value?.Trim() ?? string.Empty;
             OnPropertyChanged();
         }
     }
@@ -245,6 +258,15 @@ public sealed class ProgramEditor : ObservableBase
         }
 
         _nameWasAuto = baseName;
+    }
+
+    private async Task ChooseWorkingDirectoryAsync()
+    {
+        var path = await PickerService.PickFolderAsync();
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            WorkingDirectory = path;
+        }
     }
 }
 
@@ -402,6 +424,7 @@ public sealed class SettingsViewModel : ObservableBase
         {
             Name = name,
             Path = path,
+            WorkingDirectory = System.IO.Path.GetDirectoryName(path) ?? string.Empty,
             ProcessName = name,
             Enabled = true
         };
