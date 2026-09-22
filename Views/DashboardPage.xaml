@@ -34,11 +34,11 @@
                     Style="{StaticResource AccentButtonStyle}"
                     Command="{Binding RunCommand}"
                     HorizontalAlignment="Left"
-                    Padding="22,10">
+                    Padding="22,10,48,10">
                     <StackPanel
                         Orientation="Horizontal"
                         Spacing="10"
-                        HorizontalAlignment="Left"
+                        HorizontalAlignment="Center"
                         VerticalAlignment="Center">
                         <ProgressRing
                             Width="16"
