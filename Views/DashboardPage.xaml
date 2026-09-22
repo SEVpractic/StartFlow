@@ -35,10 +35,18 @@
                     Command="{Binding RunCommand}"
                     HorizontalAlignment="Left"
                     Padding="22,10">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <ProgressRing Width="16" Height="16" IsActive="{Binding IsRunning, Mode=OneWay}" />
-                        <FontIcon Glyph="&#xE768;" FontSize="14" />
-                        <TextBlock Text="Запустить всё" />
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center">
+                        <ProgressRing
+                            Width="16"
+                            Height="16"
+                            IsActive="{Binding IsRunning, Mode=OneWay}"
+                            VerticalAlignment="Center" />
+                        <FontIcon Glyph="&#xE768;" FontSize="14" VerticalAlignment="Center" />
+                        <TextBlock Text="Запустить всё" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
 
