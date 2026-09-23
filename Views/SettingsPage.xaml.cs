@@ -17,7 +17,6 @@ public sealed partial class SettingsPage : Page
         if (e.Parameter is SettingsViewModel viewModel)
         {
             DataContext = viewModel;
-            viewModel.XamlRoot = XamlRoot;
         }
     }
 }

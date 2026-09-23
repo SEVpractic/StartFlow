@@ -72,6 +72,7 @@ public sealed class DashboardViewModel : ObservableBase
     private bool _hasOpenFolders;
     private bool _hasPrograms;
     private string? _loadWarning;
+    private string? _activeProfileName;
 
     public DashboardViewModel(ConfigurationService configService, StartupService startupService)
     {
@@ -132,12 +133,16 @@ public ObservableCollection<FolderGenerationCardItem> FolderGenerations { get; }
 
     public bool HasLoadWarning => !string.IsNullOrEmpty(LoadWarning);
 
+    public string? ActiveProfileName { get => _activeProfileName; private set => SetField(ref _activeProfileName, value); }
+
     public void Refresh()
     {
         var config = _configService.Load() ?? StartFlowConfig.CreateDefault();
 
         LoadWarning = _configService.LoadWarning;
         OnPropertyChanged(nameof(HasLoadWarning));
+
+        ActiveProfileName = _configService.ActiveProfileName;
 
         RefreshFolderGeneration(config);
         RefreshOpenFolders(config);
