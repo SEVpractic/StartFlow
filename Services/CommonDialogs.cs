@@ -167,7 +167,7 @@ internal class FileOpenDialogRCW
 }
 
 [ComImport]
-[Guid("84BCCD23-5FDE-4CDB-AEA4-AF64B83D78AB")]
+[Guid("C0B4E2F3-BA21-4773-8DBA-335EC946EB8B")]
 internal class FileSaveDialogRCW
 {
 }
