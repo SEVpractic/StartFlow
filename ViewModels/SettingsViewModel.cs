@@ -286,6 +286,7 @@ public sealed class SettingsViewModel : ObservableBase
     public SettingsViewModel(ConfigurationService configService)
     {
         _configService = configService;
+        Profiles = new ProfileManagerViewModel(configService.Profiles, ReloadAfterProfileChange);
         AddFolderCommand = new AsyncRelayCommand(AddFolderAsync);
         AddFolderGenerationCommand = new AsyncRelayCommand(AddFolderGenerationAsync);
         AddProgramCommand = new AsyncRelayCommand(AddProgramAsync);
@@ -297,13 +298,21 @@ public sealed class SettingsViewModel : ObservableBase
 
     public AsyncRelayCommand AddProgramCommand { get; }
 
+    public ProfileManagerViewModel Profiles { get; }
+
+    private void ReloadAfterProfileChange()
+    {
+        _configService.InvalidateActiveProfile();
+        Load();
+    }
+
     public ObservableCollection<FolderToOpenEditor> Folders { get; } = new();
 
     public ObservableCollection<ProgramEditor> Programs { get; } = new();
 
     public ObservableCollection<FolderGenerationEditor> FolderGeneration { get; } = new();
 
-    public XamlRoot? XamlRoot { get; set; }
+    private static XamlRoot? CurrentXamlRoot => App.MainWindowInstance?.Content?.XamlRoot;
 
     public int SelectedThemeIndex
     {
@@ -370,6 +379,8 @@ public sealed class SettingsViewModel : ObservableBase
                 ThemeDark => 2,
                 _ => 0
             };
+
+            Profiles.Refresh();
         }
         finally
         {
@@ -435,7 +446,7 @@ public sealed class SettingsViewModel : ObservableBase
 
     private async void RequestRemoveFolder(FolderToOpenEditor editor)
     {
-        if (XamlRoot is not null)
+        if (CurrentXamlRoot is not null)
         {
             var dialog = new ContentDialog
             {
@@ -444,7 +455,7 @@ public sealed class SettingsViewModel : ObservableBase
                 PrimaryButtonText = "Удалить",
                 CloseButtonText = "Отмена",
                 DefaultButton = ContentDialogButton.Close,
-                XamlRoot = XamlRoot
+                XamlRoot = CurrentXamlRoot
             };
 
             if (await dialog.ShowAsync() != ContentDialogResult.Primary)
@@ -460,7 +471,7 @@ public sealed class SettingsViewModel : ObservableBase
 
     private async void RequestRemoveFolderGeneration(FolderGenerationEditor editor)
     {
-        if (XamlRoot is not null)
+        if (CurrentXamlRoot is not null)
         {
             var dialog = new ContentDialog
             {
@@ -469,7 +480,7 @@ public sealed class SettingsViewModel : ObservableBase
                 PrimaryButtonText = "Удалить",
                 CloseButtonText = "Отмена",
                 DefaultButton = ContentDialogButton.Close,
-                XamlRoot = XamlRoot
+                XamlRoot = CurrentXamlRoot
             };
 
             if (await dialog.ShowAsync() != ContentDialogResult.Primary)
@@ -485,7 +496,7 @@ public sealed class SettingsViewModel : ObservableBase
 
     private async void RequestRemoveProgram(ProgramEditor editor)
     {
-        if (XamlRoot is not null)
+        if (CurrentXamlRoot is not null)
         {
             var dialog = new ContentDialog
             {
@@ -494,7 +505,7 @@ public sealed class SettingsViewModel : ObservableBase
                 PrimaryButtonText = "Удалить",
                 CloseButtonText = "Отмена",
                 DefaultButton = ContentDialogButton.Close,
-                XamlRoot = XamlRoot
+                XamlRoot = CurrentXamlRoot
             };
 
             if (await dialog.ShowAsync() != ContentDialogResult.Primary)

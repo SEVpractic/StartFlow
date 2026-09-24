@@ -58,6 +58,7 @@ public partial class App : Application
 
             var lines = new List<string>
             {
+                $"Профиль: {Configuration.ActiveProfileName}",
                 "StartFlow — подготовка рабочего окружения.",
                 $"Создано папок: {result.CreatedFolders}",
                 $"Открыто папок: {result.OpenedFolders}",
@@ -89,8 +90,11 @@ public partial class App : Application
         Environment.NewLine +
         "Использование:" + Environment.NewLine +
         "  StartFlow.exe             Открыть графический интерфейс." + Environment.NewLine +
-        "  StartFlow.exe --silent    Выполнить конфигурацию без окна и завершиться." + Environment.NewLine +
+        "  StartFlow.exe --silent    Выполнить активный профиль без окна и завершиться." + Environment.NewLine +
         "  StartFlow.exe --help      Показать эту справку." + Environment.NewLine +
         Environment.NewLine +
-        "Конфигурация: файл startflow.json рядом с исполняемым файлом.";
+        "Пользовательские данные (профили, резервные копии, состояние) хранятся в:" + Environment.NewLine +
+        "  %LOCALAPPDATA%\\StartFlow\\" + Environment.NewLine +
+        Environment.NewLine +
+        "Активный профиль можно переключить в настройках приложения.";
 }

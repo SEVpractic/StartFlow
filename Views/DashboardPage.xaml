@@ -21,6 +21,16 @@
                         Text="Быстрый запуск рабочего окружения"
                         Style="{StaticResource BodyStrongTextBlockStyle}"
                         Opacity="0.7" />
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                        <FontIcon
+                            Glyph="&#xE77B;"
+                            FontSize="12"
+                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Активный профиль:" Style="{StaticResource SecondaryTextStyle}" />
+                            <TextBlock Text="{Binding ActiveProfileName}" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
 
                 <InfoBar

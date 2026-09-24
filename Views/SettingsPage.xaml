@@ -32,6 +32,66 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Профили" Style="{StaticResource SectionTitleStyle}" />
+                            <TextBlock
+                                Text="Профили хранят независимые наборы настроек. Активный профиль используется при обычном и тихом запуске."
+                                FontSize="12"
+                                Style="{StaticResource SecondaryTextStyle}" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Активный профиль:" Style="{StaticResource FieldCaptionStyle}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Profiles.ActiveProfileName}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <ListView
+                            ItemsSource="{Binding Profiles.Profiles}"
+                            SelectedItem="{Binding Profiles.SelectedProfile, Mode=TwoWay}"
+                            SelectionMode="Single"
+                            MinHeight="72"
+                            MaxHeight="220"
+                            HorizontalAlignment="Stretch">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnSpacing="8" HorizontalAlignment="Stretch">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="{Binding Name}"
+                                            TextTrimming="CharacterEllipsis"
+                                            VerticalAlignment="Center" />
+                                        <Border
+                                            Grid.Column="1"
+                                            Style="{StaticResource BadgePillStyle}"
+                                            VerticalAlignment="Center"
+                                            Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="активный" FontSize="12" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Выбрать" Command="{Binding Profiles.SelectProfileCommand}" />
+                            <Button Content="Создать" Command="{Binding Profiles.CreateProfileCommand}" />
+                            <Button Content="Копировать" Command="{Binding Profiles.CopyProfileCommand}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Переименовать" Command="{Binding Profiles.RenameProfileCommand}" />
+                            <Button Content="Удалить" Command="{Binding Profiles.DeleteProfileCommand}" />
+                            <Button Content="Экспорт" Command="{Binding Profiles.ExportProfileCommand}" />
+                            <Button Content="Импорт" Command="{Binding Profiles.ImportProfileCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
                         <TextBlock Text="Генерация папки" Style="{StaticResource SectionTitleStyle}" />
 
                         <TextBlock

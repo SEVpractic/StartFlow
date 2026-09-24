@@ -3,6 +3,10 @@ using StartFlow.Models;
 
 namespace StartFlow.Services;
 
+/// <summary>
+/// Фасад конфигурации приложения. Работает с активным профилем через ProfileService.
+/// UI/ViewModels не знают ни путей, ни устройства хранения — они обращаются к этому сервису.
+/// </summary>
 public sealed class ConfigurationService
 {
     public static JsonSerializerOptions JsonOptions { get; } = new()
@@ -11,88 +15,72 @@ public sealed class ConfigurationService
         WriteIndented = true
     };
 
-    private StartFlowConfig? _config;
+    private readonly ProfileService _profiles;
+    private ProfileModel? _activeProfile;
 
-    public string ConfigPath { get; }
+    public ProfileService Profiles { get; }
 
-    public StartFlowConfig? CurrentConfig => _config;
+    public StartFlowConfig? CurrentConfig => _activeProfile?.Config;
 
     public string? LoadWarning { get; private set; }
 
-    public ConfigurationService(string? filePath = null)
+    public string ActiveProfileName => _activeProfile?.Name ?? Profiles.GetActiveProfileName();
+
+    public string DataDirectory => _profiles.RootPath;
+
+    public string ProfilesDirectory => _profiles.ProfilesPath;
+
+    public ConfigurationService()
     {
-        ConfigPath = filePath ?? Path.Combine(AppContext.BaseDirectory, "startflow.json");
+        var backup = new BackupService();
+        _profiles = new ProfileService(backup, new MigrationService(backup));
+        Profiles = _profiles;
     }
 
+    /// <summary>Загружает настройки активного профиля (с миграцией схемы при необходимости).</summary>
     public StartFlowConfig Load()
     {
-        if (_config is not null)
+        if (_activeProfile is not null)
         {
-            return _config;
+            return _activeProfile.Config;
         }
 
-        LoadWarning = null;
-
-        if (!File.Exists(ConfigPath))
-        {
-            _config = StartFlowConfig.CreateDefault();
-            Save(_config, out _);
-            return _config;
-        }
-
-        try
-        {
-            var json = File.ReadAllText(ConfigPath);
-            var loaded = JsonSerializer.Deserialize<StartFlowConfig>(json, JsonOptions);
-            if (loaded is null)
-            {
-                throw new JsonException("Конфигурация пуста.");
-            }
-
-            _config = loaded;
-            return _config;
-        }
-        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
-        {
-            TryBackupCorruptFile();
-            _config = StartFlowConfig.CreateDefault();
-            LoadWarning = "Файл конфигурации повреждён и не может быть прочитан. Создана конфигурация по умолчанию.";
-            Save(_config, out _);
-            return _config;
-        }
+        _activeProfile = _profiles.LoadActiveProfile(out var warning);
+        LoadWarning = warning;
+        return _activeProfile.Config;
     }
 
     public bool Save(StartFlowConfig config, out string? error)
     {
-        try
+        if (_activeProfile is null)
         {
-            var directory = Path.GetDirectoryName(ConfigPath);
-            if (!string.IsNullOrEmpty(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
+            Load();
+        }
 
-            File.WriteAllText(ConfigPath, JsonSerializer.Serialize(config, JsonOptions));
-            error = null;
-            return true;
-        }
-        catch (Exception ex)
+        if (!ReferenceEquals(_activeProfile!.Config, config))
         {
-            error = ex.Message;
-            return false;
+            _activeProfile.Config = config;
         }
+
+        var result = _profiles.SaveActiveProfile(_activeProfile, out error);
+        return result.Success;
     }
 
-    private void TryBackupCorruptFile()
+    public ProfileOperationResult SetActiveProfile(string name)
     {
-        try
+        var result = _profiles.SetActiveProfile(name);
+        if (result.Success)
         {
-            var backup = ConfigPath + ".bad";
-            File.Copy(ConfigPath, backup, overwrite: true);
+            InvalidateActiveProfile();
         }
-        catch
-        {
-            // Backup is best-effort; ignore failures.
-        }
+
+        return result;
+    }
+
+    /// <summary>Сбрасывает кеш активного профиля; следующее обращение к Load() перечитает данные с диска.</summary>
+    public void InvalidateActiveProfile()
+    {
+        _activeProfile = null;
+        LoadWarning = null;
     }
 }
