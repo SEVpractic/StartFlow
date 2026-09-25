@@ -33,16 +33,17 @@
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Image
-                                Width="32"
-                                Height="32"
+                                Width="24"
+                                Height="24"
                                 VerticalAlignment="Center"
-                                Source="{Binding IconData, Converter={StaticResource IconBytesToImage}}"
-                                Visibility="{Binding IconData, Converter={StaticResource NotNullToVis}}" />
+                                Stretch="Uniform"
+                                Source="{Binding Icon}"
+                                Visibility="{Binding Icon, Converter={StaticResource NotNullToVis}}" />
                             <FontIcon
                                 Glyph="&#xE9D5;"
-                                FontSize="22"
+                                FontSize="18"
                                 VerticalAlignment="Center"
-                                Visibility="{Binding IconData, Converter={StaticResource NullToVis}}" />
+                                Visibility="{Binding Icon, Converter={StaticResource NullToVis}}" />
                             <StackPanel VerticalAlignment="Center" Spacing="2">
                                 <TextBlock
                                     Text="{Binding Name}"

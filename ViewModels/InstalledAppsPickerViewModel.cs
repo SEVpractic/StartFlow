@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Microsoft.UI.Xaml.Media;
 using StartFlow.Models;
 using StartFlow.Services;
 
@@ -7,6 +8,7 @@ namespace StartFlow.ViewModels;
 public sealed class InstalledApplicationItem : ObservableBase
 {
     private readonly InstalledApplication _source;
+    private ImageSource? _icon;
 
     public InstalledApplicationItem(InstalledApplication source)
     {
@@ -17,7 +19,11 @@ public sealed class InstalledApplicationItem : ObservableBase
 
     public string Name => _source.Name;
 
-    public byte[]? IconData => _source.IconData;
+    public ImageSource? Icon
+    {
+        get => _icon;
+        set => SetField(ref _icon, value);
+    }
 
     public bool CanAddAsProgram => _source.CanAddAsProgram;
 
@@ -82,7 +88,15 @@ public sealed class InstalledAppsPickerViewModel : ObservableBase
             SelectedItem = null;
 
             _all.Clear();
-            var items = apps.Select(a => new InstalledApplicationItem(a)).ToList();
+
+            var items = new List<InstalledApplicationItem>(apps.Count);
+            foreach (var app in apps)
+            {
+                var item = new InstalledApplicationItem(app);
+                item.Icon = await IconImageSourceFactory.CreateFromPixelDataAsync(app.IconData);
+                items.Add(item);
+            }
+
             items.Sort((x, y) => StringComparer.CurrentCultureIgnoreCase.Compare(x.Name, y.Name));
             _all.AddRange(items);
 

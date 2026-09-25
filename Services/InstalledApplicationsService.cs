@@ -19,7 +19,7 @@ public sealed partial class InstalledApplicationsService
     private const string PropTargetParsingPath = "System.Link.TargetParsingPath";
     private const string PropLaunchArguments = "System.Link.Arguments";
 
-    private const int IconSize = 32;
+    private const int IconSize = 48;
 
     private static readonly HashSet<string> LaunchableExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
