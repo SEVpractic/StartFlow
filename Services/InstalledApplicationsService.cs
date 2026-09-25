@@ -71,6 +71,17 @@ public sealed partial class InstalledApplicationsService
         return result;
     }
 
+    /// <summary>Извлечь иконку по пути к файлу (BGRA, 48x48). null — если извлечь не удалось.</summary>
+    public static byte[]? ExtractIconBytes(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        return TryExtractIcon(path);
+    }
+
     private dynamic? TryGetItems()
     {
         try

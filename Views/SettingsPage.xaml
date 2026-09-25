@@ -223,10 +223,32 @@
                                 <DataTemplate>
                                     <Border Style="{StaticResource InnerCardStyle}" Margin="0,0,0,8">
                                         <StackPanel Spacing="10">
-                                            <TextBox
-                                                Header="Название"
-                                                IsSpellCheckEnabled="False"
-                                                Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Image
+                                                    Grid.Column="0"
+                                                    Width="16"
+                                                    Height="16"
+                                                    VerticalAlignment="Bottom"
+                                                    Margin="4,24,0,14"
+                                                    Source="{Binding Icon}"
+                                                    Visibility="{Binding Icon, Converter={StaticResource NotNullToVis}}" />
+                                                <FontIcon
+                                                    Glyph="&#xE8B7;"
+                                                    FontSize="14"
+                                                    VerticalAlignment="Bottom"
+                                                    Margin="4,24,0,13"
+                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                    Visibility="{Binding Icon, Converter={StaticResource NullToVis}}" />
+                                                <TextBox
+                                                    Grid.Column="1"
+                                                    Header="Название"
+                                                    IsSpellCheckEnabled="False"
+                                                    Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Grid>
 
                                             <Grid ColumnSpacing="8">
                                                 <Grid.ColumnDefinitions>

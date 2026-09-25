@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using StartFlow.Models;
 using StartFlow.Services;
 using StartFlow.Views;
@@ -137,6 +138,8 @@ public sealed class ProgramEditor : ObservableBase
     private readonly ProgramConfig _model;
     private readonly Action<ProgramEditor> _requestRemove;
     private string _nameWasAuto;
+    private ImageSource? _icon;
+    private CancellationTokenSource? _iconLoadCts;
 
     public ProgramEditor(ProgramConfig model, Action<ProgramEditor> requestRemove)
     {
@@ -146,6 +149,13 @@ public sealed class ProgramEditor : ObservableBase
         ChooseExeCommand = new AsyncRelayCommand(ChooseExeAsync);
         ChooseWorkingDirectoryCommand = new AsyncRelayCommand(ChooseWorkingDirectoryAsync);
         DeleteCommand = new RelayCommand(() => _requestRemove(this));
+        ScheduleIconLoad();
+    }
+
+    public ImageSource? Icon
+    {
+        get => _icon;
+        private set => SetField(ref _icon, value);
     }
 
     public AsyncRelayCommand ChooseExeCommand { get; }
@@ -173,6 +183,7 @@ public sealed class ProgramEditor : ObservableBase
         {
             _model.Path = value?.Trim() ?? string.Empty;
             OnPropertyChanged();
+            ScheduleIconLoad();
         }
     }
 
@@ -233,6 +244,35 @@ public sealed class ProgramEditor : ObservableBase
         {
             _model.Enabled = value;
             OnPropertyChanged();
+        }
+    }
+
+    private void ScheduleIconLoad()
+    {
+        _iconLoadCts?.Cancel();
+        var cts = new CancellationTokenSource();
+        _iconLoadCts = cts;
+        _ = LoadIconAsync(cts.Token);
+    }
+
+    private async Task LoadIconAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(200, token);
+            var bytes = await Task.Run(() => InstalledApplicationsService.ExtractIconBytes(Path));
+            token.ThrowIfCancellationRequested();
+            Icon = await IconImageSourceFactory.CreateFromPixelDataAsync(bytes);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch
+        {
+            if (!token.IsCancellationRequested)
+            {
+                Icon = null;
+            }
         }
     }
 
