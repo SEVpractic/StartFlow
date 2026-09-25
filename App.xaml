@@ -12,6 +12,9 @@
 
             <vm:BooleanToVisibilityConverter x:Key="BoolToVis" />
             <vm:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+            <vm:NotNullToVisibilityConverter x:Key="NotNullToVis" />
+            <vm:NullToVisibilityConverter x:Key="NullToVis" />
+            <vm:IconBytesToImageConverter x:Key="IconBytesToImage" />
 
             <Style x:Key="CardStyle" TargetType="Border">
                 <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />

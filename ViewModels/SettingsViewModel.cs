@@ -3,8 +3,16 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StartFlow.Models;
 using StartFlow.Services;
+using StartFlow.Views;
 
 namespace StartFlow.ViewModels;
+
+internal enum AddProgramMode
+{
+    None,
+    Installed,
+    Manual
+}
 
 public sealed class FolderGenerationEditor : ObservableBase
 {
@@ -424,18 +432,141 @@ public sealed class SettingsViewModel : ObservableBase
 
     private async Task AddProgramAsync()
     {
+        var mode = await AskAddProgramModeAsync();
+        if (mode == AddProgramMode.None)
+        {
+            return;
+        }
+
+        if (mode == AddProgramMode.Manual)
+        {
+            await AddManualProgramAsync();
+            return;
+        }
+
+        await AddInstalledProgramAsync();
+    }
+
+    private async Task<AddProgramMode> AskAddProgramModeAsync()
+    {
+        var installedButton = new Button
+        {
+            Content = "Выбрать из установленных приложений",
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
+        var manualButton = new Button
+        {
+            Content = "Найти exe вручную",
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
+
+        var content = new StackPanel { Spacing = 8, MinWidth = 380 };
+        content.Children.Add(installedButton);
+        content.Children.Add(manualButton);
+
+        var mode = AddProgramMode.None;
+        var dialog = new ContentDialog
+        {
+            Title = "Добавить приложение",
+            Content = content,
+            CloseButtonText = "Отмена",
+            XamlRoot = CurrentXamlRoot
+        };
+
+        installedButton.Click += (_, _) =>
+        {
+            mode = AddProgramMode.Installed;
+            dialog.Hide();
+        };
+        manualButton.Click += (_, _) =>
+        {
+            mode = AddProgramMode.Manual;
+            dialog.Hide();
+        };
+
+        await dialog.ShowAsync();
+        return mode;
+    }
+
+    private async Task AddInstalledProgramAsync()
+    {
+        var pickerViewModel = new InstalledAppsPickerViewModel();
+        var picker = new InstalledAppsPickerView { DataContext = pickerViewModel };
+
+        var dialog = new ContentDialog
+        {
+            Title = "Выбор установленного приложения",
+            Content = picker,
+            PrimaryButtonText = "Выбрать",
+            CloseButtonText = "Отмена",
+            DefaultButton = ContentDialogButton.Primary,
+            IsPrimaryButtonEnabled = false,
+            XamlRoot = CurrentXamlRoot
+        };
+
+        pickerViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(InstalledAppsPickerViewModel.SelectedItem))
+            {
+                dialog.IsPrimaryButtonEnabled = pickerViewModel.SelectedItem is { CanAddAsProgram: true };
+            }
+        };
+
+        var showDialog = dialog.ShowAsync();
+        await pickerViewModel.LoadAsync();
+        var result = await showDialog;
+
+        if (result == ContentDialogResult.Primary
+            && pickerViewModel.SelectedItem is { CanAddAsProgram: true })
+        {
+            AddProgramFromInstalled(pickerViewModel.SelectedItem.Source);
+        }
+    }
+
+    private void AddProgramFromInstalled(InstalledApplication application)
+    {
+        if (!application.CanAddAsProgram || string.IsNullOrWhiteSpace(application.ExecutablePath))
+        {
+            return;
+        }
+
+        var exe = application.ExecutablePath;
+        var isExe = string.Equals(Path.GetExtension(exe), ".exe", StringComparison.OrdinalIgnoreCase);
+        var name = string.IsNullOrWhiteSpace(application.Name)
+            ? Path.GetFileNameWithoutExtension(exe)
+            : application.Name.Trim();
+
+        var model = new ProgramConfig
+        {
+            Name = name,
+            Path = exe,
+            Args = application.LaunchArguments ?? string.Empty,
+            WorkingDirectory = Path.GetDirectoryName(exe) ?? string.Empty,
+            ProcessName = isExe ? Path.GetFileNameWithoutExtension(exe) : string.Empty,
+            Enabled = true,
+            RunAsAdmin = false,
+            SkipIfRunning = false
+        };
+
+        _config.Programs.Add(model);
+        Programs.Add(AttachAutoSave(new ProgramEditor(model, RequestRemoveProgram)));
+        AutoSave();
+    }
+
+    private async Task AddManualProgramAsync()
+    {
         var path = await PickerService.PickExecutableAsync();
         if (string.IsNullOrWhiteSpace(path))
         {
             return;
         }
 
-        var name = System.IO.Path.GetFileNameWithoutExtension(path);
+        var name = Path.GetFileNameWithoutExtension(path);
         var model = new ProgramConfig
         {
             Name = name,
             Path = path,
-            WorkingDirectory = System.IO.Path.GetDirectoryName(path) ?? string.Empty,
+            WorkingDirectory = Path.GetDirectoryName(path) ?? string.Empty,
             ProcessName = name,
             Enabled = true
         };
