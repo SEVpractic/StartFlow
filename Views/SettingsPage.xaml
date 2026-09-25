@@ -41,8 +41,10 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="Активный профиль:" Style="{StaticResource FieldCaptionStyle}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Profiles.ActiveProfileName}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Активный профиль:" Style="{StaticResource SecondaryTextStyle}" />
+                                <TextBlock Text="{Binding Profiles.ActiveProfileName}" FontWeight="SemiBold" />
+                            </StackPanel>
                         </StackPanel>
 
                         <ListView
@@ -223,32 +225,31 @@
                                 <DataTemplate>
                                     <Border Style="{StaticResource InnerCardStyle}" Margin="0,0,0,8">
                                         <StackPanel Spacing="10">
-                                            <Grid ColumnSpacing="8">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <Image
-                                                    Grid.Column="0"
-                                                    Width="16"
-                                                    Height="16"
-                                                    VerticalAlignment="Bottom"
-                                                    Margin="4,24,0,14"
-                                                    Source="{Binding Icon}"
-                                                    Visibility="{Binding Icon, Converter={StaticResource NotNullToVis}}" />
-                                                <FontIcon
-                                                    Glyph="&#xE8B7;"
-                                                    FontSize="14"
-                                                    VerticalAlignment="Bottom"
-                                                    Margin="4,24,0,13"
-                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                    Visibility="{Binding Icon, Converter={StaticResource NullToVis}}" />
-                                                <TextBox
-                                                    Grid.Column="1"
-                                                    Header="Название"
-                                                    IsSpellCheckEnabled="False"
-                                                    Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                            </Grid>
+                                            <TextBox IsSpellCheckEnabled="False" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <TextBox.Header>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="Название" VerticalAlignment="Center" />
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                            <Image
+                                                                Width="14"
+                                                                Height="14"
+                                                                VerticalAlignment="Center"
+                                                                Source="{Binding Icon}"
+                                                                Visibility="{Binding Icon, Converter={StaticResource NotNullToVis}}" />
+                                                            <FontIcon
+                                                                Glyph="&#xE8B7;"
+                                                                FontSize="12"
+                                                                VerticalAlignment="Center"
+                                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                Visibility="{Binding Icon, Converter={StaticResource NullToVis}}" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </TextBox.Header>
+                                            </TextBox>
 
                                             <Grid ColumnSpacing="8">
                                                 <Grid.ColumnDefinitions>
