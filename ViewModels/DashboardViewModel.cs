@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
+using Microsoft.UI.Xaml.Media;
 using StartFlow.Models;
 using StartFlow.Services;
 
@@ -20,8 +21,10 @@ public sealed class ProgramBadge
     public bool HasGlyph => !string.IsNullOrEmpty(Glyph);
 }
 
-public sealed class ProgramCardItem
+public sealed class ProgramCardItem : ObservableBase
 {
+    private ImageSource? _icon;
+
     public ProgramCardItem(string name, string path, IReadOnlyList<ProgramBadge> badges)
     {
         Name = name;
@@ -38,6 +41,12 @@ public sealed class ProgramCardItem
     public string DisplayName => string.IsNullOrWhiteSpace(Name) ? System.IO.Path.GetFileName(Path) : Name;
 
     public bool HasBadges => Badges.Count > 0;
+
+    public ImageSource? Icon
+    {
+        get => _icon;
+        set => SetField(ref _icon, value);
+    }
 }
 
 public sealed class FolderGenerationCardItem
@@ -211,10 +220,18 @@ public ObservableCollection<FolderGenerationCardItem> FolderGenerations { get; }
                 badges.Add(new ProgramBadge(string.Empty, "Повторный запуск разрешён"));
             }
 
-            Programs.Add(new ProgramCardItem(program.Name, program.Path, badges));
+            var item = new ProgramCardItem(program.Name, program.Path, badges);
+            Programs.Add(item);
+            _ = LoadIconAsync(item);
         }
 
         HasPrograms = Programs.Count > 0;
+    }
+
+    private static async Task LoadIconAsync(ProgramCardItem item)
+    {
+        var icon = await IconImageSourceFactory.CreateFromPathAsync(item.Path);
+        item.Icon = icon;
     }
 
     private async Task ExecuteRunAsync()
