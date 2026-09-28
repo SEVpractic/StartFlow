@@ -272,6 +272,48 @@ public sealed partial class InstalledApplicationsService
 
     private static byte[]? TryExtractIcon(string path)
     {
+        var hIcon = ExtractResourceIcon(path);
+        if (hIcon != IntPtr.Zero)
+        {
+            try
+            {
+                var bytes = RenderIconToBytes(hIcon);
+                if (bytes is not null)
+                {
+                    return bytes;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                DestroyIcon(hIcon);
+            }
+        }
+
+        return ExtractShellIcon(path);
+    }
+
+    /// <summary>Иконка из ресурсов файла (в точности как у ярлыка). Для .exe/.dll/.ico, у остальных — пусто.</summary>
+    private static IntPtr ExtractResourceIcon(string path)
+    {
+        try
+        {
+            var largeIcons = new IntPtr[1];
+            var count = ExtractIconEx(path, 0, largeIcons, null, 1);
+            return count > 0 ? largeIcons[0] : IntPtr.Zero;
+        }
+        catch
+        {
+            return IntPtr.Zero;
+        }
+    }
+
+    /// <summary>Иконка от Shell (по типу файла). Если это "пустой" монохромный глиф (например, .msc), вернуть null.</summary>
+    private static byte[]? ExtractShellIcon(string path)
+    {
         var shFileInfo = default(SHFILEINFO);
         var result = SHGetFileInfo(path, 0, ref shFileInfo, (uint)Marshal.SizeOf<SHFILEINFO>(), SHGFI_ICON | SHGFI_SHELLICONSIZE);
         var hIcon = shFileInfo.hIcon;
@@ -280,6 +322,28 @@ public sealed partial class InstalledApplicationsService
             return null;
         }
 
+        try
+        {
+            var bytes = RenderIconToBytes(hIcon);
+            if (bytes is null)
+            {
+                return null;
+            }
+
+            return IsBlandIcon(bytes) ? null : bytes;
+        }
+        catch
+        {
+            return null;
+        }
+        finally
+        {
+            DestroyIcon(hIcon);
+        }
+    }
+
+    private static byte[]? RenderIconToBytes(IntPtr hIcon)
+    {
         var screenDc = IntPtr.Zero;
         var memDc = IntPtr.Zero;
         var bitmap = IntPtr.Zero;
@@ -316,10 +380,6 @@ public sealed partial class InstalledApplicationsService
             var lines = GetDIBits(memDc, bitmap, 0, (uint)IconSize, bytes, ref header, DIB_RGB_COLORS);
             return lines == 0 ? null : bytes;
         }
-        catch
-        {
-            return null;
-        }
         finally
         {
             if (memDc != IntPtr.Zero && bitmap != IntPtr.Zero)
@@ -336,9 +396,30 @@ public sealed partial class InstalledApplicationsService
             {
                 ReleaseDC(IntPtr.Zero, screenDc);
             }
-
-            DestroyIcon(hIcon);
         }
+    }
+
+    /// <summary>Монохромный "пустой" глиф (белый лист без цвета, как у .msc) — иконки фактически нет.</summary>
+    private static bool IsBlandIcon(byte[] bgra)
+    {
+        var colored = 0;
+        var buckets = new HashSet<int>();
+        for (var i = 0; i < bgra.Length; i += 4)
+        {
+            var b = bgra[i];
+            var g = bgra[i + 1];
+            var r = bgra[i + 2];
+            var max = Math.Max(b, Math.Max(g, r));
+            var min = Math.Min(b, Math.Min(g, r));
+            if (max - min >= 24)
+            {
+                colored++;
+            }
+
+            buckets.Add((r & 0xF8) << 10 | (g & 0xF8) << 5 | (b & 0xF8));
+        }
+
+        return colored == 0 && buckets.Count < 64;
     }
 
     private static void TryRelease(dynamic comObject)
@@ -396,6 +477,9 @@ public sealed partial class InstalledApplicationsService
         ref SHFILEINFO psfi,
         uint cbFileInfo,
         uint uFlags);
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int ExtractIconEx(string lpszFile, int nIconIndex, IntPtr[] phiconLarge, IntPtr[]? phiconSmall, uint nIcons);
 
     [DllImport("user32.dll")]
     private static extern bool DestroyIcon(IntPtr hIcon);
