@@ -15,14 +15,19 @@ public sealed class ProfileManagerViewModel : ObservableBase
 {
     private readonly ProfileService _profiles;
     private readonly Action _activeProfileChanged;
+    private readonly Action _profilesChanged;
     private ProfileInfo? _selectedProfile;
 
     private static XamlRoot? CurrentXamlRoot => App.MainWindowInstance?.Content?.XamlRoot;
 
-    public ProfileManagerViewModel(ProfileService profiles, Action activeProfileChanged)
+    public ProfileManagerViewModel(
+        ProfileService profiles,
+        Action activeProfileChanged,
+        Action? profilesChanged = null)
     {
         _profiles = profiles;
         _activeProfileChanged = activeProfileChanged;
+        _profilesChanged = profilesChanged ?? (() => { });
 
         SelectProfileCommand = new RelayCommand(SelectProfile, CanSelectProfile);
         CreateProfileCommand = new AsyncRelayCommand(CreateProfileAsync);
@@ -78,6 +83,9 @@ public sealed class ProfileManagerViewModel : ObservableBase
         SelectedProfile = Profiles.FirstOrDefault(p => string.Equals(p.Name, previousName, StringComparison.OrdinalIgnoreCase));
         OnPropertyChanged(nameof(ActiveProfileName));
         RaiseCanExecuteChanged();
+
+        // Состав профилей изменился — держим Jump List в актуальном состоянии.
+        _profilesChanged();
     }
 
     private bool HasSelection() => SelectedProfile is not null;

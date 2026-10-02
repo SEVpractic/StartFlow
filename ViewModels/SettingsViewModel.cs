@@ -334,7 +334,7 @@ public sealed class SettingsViewModel : ObservableBase
     public SettingsViewModel(ConfigurationService configService)
     {
         _configService = configService;
-        Profiles = new ProfileManagerViewModel(configService.Profiles, ReloadAfterProfileChange);
+        Profiles = new ProfileManagerViewModel(configService.Profiles, ReloadAfterProfileChange, App.RefreshJumpList);
         AddFolderCommand = new AsyncRelayCommand(AddFolderAsync);
         AddFolderGenerationCommand = new AsyncRelayCommand(AddFolderGenerationAsync);
         AddProgramCommand = new AsyncRelayCommand(AddProgramAsync);
