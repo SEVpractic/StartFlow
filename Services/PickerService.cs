@@ -11,7 +11,9 @@ public static class PickerService
     {
         var fileTypes = new[]
         {
-            new COMDLG_FILTERSPEC { pszName = "Программы", pszSpec = "*.exe;*.bat;*.cmd;*.lnk" },
+            new COMDLG_FILTERSPEC { pszName = "Исполняемые файлы (*.exe)", pszSpec = "*.exe" },
+            new COMDLG_FILTERSPEC { pszName = "Командные скрипты (*.cmd;*.bat)", pszSpec = "*.cmd;*.bat" },
+            new COMDLG_FILTERSPEC { pszName = "Все поддерживаемые файлы (*.exe;*.cmd;*.bat)", pszSpec = "*.exe;*.cmd;*.bat" },
             new COMDLG_FILTERSPEC { pszName = "Все файлы", pszSpec = "*.*" }
         };
 

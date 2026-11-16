@@ -302,7 +302,7 @@ public sealed class ProgramEditor : ObservableBase
 
         if (shouldUpdateProcessName)
         {
-            ProcessName = baseName;
+            ProcessName = ProcessService.IsCommandScript(chosen) ? string.Empty : baseName;
         }
 
         _nameWasAuto = baseName;
@@ -607,7 +607,7 @@ public sealed class SettingsViewModel : ObservableBase
             Name = name,
             Path = path,
             WorkingDirectory = Path.GetDirectoryName(path) ?? string.Empty,
-            ProcessName = name,
+            ProcessName = ProcessService.IsCommandScript(path) ? string.Empty : name,
             Enabled = true
         };
         _config.Programs.Add(model);
